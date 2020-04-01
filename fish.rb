@@ -18,57 +18,96 @@ end
 @four = House.new(4)
 @five = House.new(5)
 @names = [@one, @two, @three, @four, @five]
-@attribs = [:color, :nationality, :pet, :drink, :smoke]
+@attribute = [:nationality, :smoke, :color, :drink, :pet]
 
 @neighbor_one = [[:smoke, "blend", :pet,  "cat"], [:pet, "horse", :smoke, "dunhill"], [:nationality, "norwegian", :color, "blue"]]
 
 @neighbor_two = [:color, "green", :color, "white"]
 
-
-@pairs_array = [[:nationality, "british", :color "red"], [nationality, "swedish", :pet, "dog"], [:nationality, "danish", :drink, "tea"], [:color, "green", :drink "coffee"], [:smoke, "pallmall", :pet, "birds"], [:color, "yellow", :smoke, "dunhill"], [:smoke, "bluemaster", :drink, "beer"], [:nationality, "german", :smoke, "prince"] ]
+@clue_pairs = [[:nationality, "british", :color "red"], [nationality, "swedish", :pet, "dog"], [:nationality, "danish", :drink, "tea"], [:color, "green", :drink "coffee"], [:smoke, "pallmall", :pet, "birds"], [:color, "yellow", :smoke, "dunhill"], [:smoke, "bluemaster", :drink, "beer"], [:nationality, "german", :smoke, "prince"] ]
 
 @neighbor_map = [[@one,@two], [@two,@one,@three], [@three,@two,@four], [@four,@three,@five], [@five,@four]]
 
-def compare(house,attrib,clueone,cluetwo)
-    if house.public_send(attrib)[clueone] == 1
+def compare(house,attrib_one,val_one,attrib_two,val_two)
+    if house.public_send(attrib_one)[val_one] == 1
+        house.public_send(attrib_two)[val_two] = 1
+    end
+    if house.public_send(attrib_one)[val_one] == 0
+        house.public_send(attrib_two)[val_two] = 0
+    end
 end
-
-# first two attribs are direct assignments and need no logic to locate them, just setting them directly
-def specific
-    @three.drink["milk"] = 1
-    @one.nationality["norwegian"] = 1
-end
-
-specific
 
 def both_neighbor
     @neighbor_one.each do |clue|
+        @attr_one = clue[0]
+        @val_one = clue[1]
+        @attr_two = clue[2]
+        @val_two = clue[3]
         @attribs.each do |attrib|
-        @neighbor_map.each do |location|
-            if location.length ==2
-                compare(location[0], attrib, )
-            else
+            @neighbor_map.each do |location|
+                if location.length ==2
+                    compare(location[0], attrib, )
+                else
 
+                end
             end
         end
     end
 end
 
 def pair_check
-    # @test[3].color["red"] = 1
-    # @test[0].color["red"] -- returns value
-    @pairs_array.each do |a|
-        @first = a[0]
-        @second = a[1]
-       # binding.pry
+    @clue_pairs.each do |clue|
+        @attr_one = clue[0]
+        @val_one = clue[1]
+        @attr_two = clue[2]
+        @val_two = clue[3]
         @names.each do |house|
-            @attribs.each do |cclue|
-                compare(house,clue,@first,@second)
-                compare(house,clue,@second,@first)
-            end
-            # binding.pry
+            compare(house,@attr_one,@val_one,@attr_two,@val_two)
+            compare(house,@attr_two,@val_two,@attr_one,@val_one)
         end
     end
 end
+
+# if a value is 1, or 4 are 0, complete setting others values for that attribute
+# additionally, if any house attribute value is 1, set it to 0 for all the other houses
+def janitor
+    @names.each do |house|
+        @attribute.each do |attrib|
+            negatory = house.public_send(attrib).select {|k,v| v == 0}
+            incomplete = house.public_send(attrib).select {|k,v| v == 9}
+            complete = house.public_send(attrib).select {|k,v| v == 1}
+            if complete.length == 1 && negatory.length == 4
+                negatory.each do |key,val|
+                    house.public_send(attrib)[key] = 0
+                end
+            elsif complete.length == 1 && negatory.length < 4
+                combined = negatory.merge(incomplete)
+                combined.each do |key,val|
+                    house.public_send(attrib)[key] = 0
+                end
+            elsif negatory.length == 4 && incomplete.length == 1
+                incomplete.each_key {|key| @update = key}
+                house.public_send(attrib)[@update] = 1
+            end
+        end
+    end
+    @names.each do |house|
+        @attribute.each do |attrib|
+            complete = house.public_send(attrib).select {|k,v| v == 1}
+            if complete != nil
+                complete.each_key {|key| @update = key}
+                @names.each do |negate|
+                    if negate != house
+                        house.public_send(@update) = 0
+                    end
+                end
+            end
+        end
+    end
+end
+
+# first two clues are direct assignments and need no logic to locate them, just setting them directly
+@three.drink["milk"] = 1
+@one.nationality["norwegian"] = 1
 
 @test2 = pair_check
