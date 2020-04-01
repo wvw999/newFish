@@ -28,12 +28,12 @@ end
 
 @neighbor_map = [[@one,@two], [@two,@one,@three], [@three,@two,@four], [@four,@three,@five], [@five,@four]]
 
-def compare(house,attrib_one,val_one,attrib_two,val_two)
-    if house.public_send(attrib_one)[val_one] == 1
-        house.public_send(attrib_two)[val_two] = 1
+def compare(house,attr_one,val_one,attr_two,val_two)
+    if house.public_send(attr_one)[val_one] == 1
+        house.public_send(attr_two)[val_two] = 1
     end
-    if house.public_send(attrib_one)[val_one] == 0
-        house.public_send(attrib_two)[val_two] = 0
+    if house.public_send(attr_one)[val_one] == 0
+        house.public_send(attr_two)[val_two] = 0
     end
 end
 
@@ -45,11 +45,38 @@ def both_neighbor
         @val_two = clue[3]
         @attribs.each do |attrib|
             @neighbor_map.each do |location|
-                if location.length ==2
-                    compare(location[0], attrib, )
+                if location.length == 2
+                    if location[0].public_send(@attr_one)[@val_one] == 1
+                        location[1].public_send(@attr_two)[@val_two] = 1
+                    end
+                    if location[0].public_send(@attr_two)[@val_two] == 1
+                        location[1].public_send(@attr_one)[@val_one] = 1
+                    end
                 else
-
+                    if location[0].public_send(@attr_one)[@val_one] == 1 && location[1].public_send(@attr_two)[@val_two] == 0 && location[2].public_send(@attr_two)[@val_two] == 9
+                        location[2].public_send(@attr_two)[@val_two] = 1
+                    elsif location[0].public_send(@attr_one)[@val_one] == 1 && location[1].public_send(@attr_two)[@val_two] == 9 && location[2].public_send(@attr_two)[@val_two] == 0
+                        location[1].public_send(@attr_two)[@val_two] = 1
+                    end
                 end
+            end
+        end
+    end
+end
+
+def one_neighbor
+    @neighbor_two.each do |clue|
+        @attr_one = clue[0]
+        @val_one = clue[1]
+        @attr_two = clue[2]
+        @val_two = clue[3]
+        @names.each do |house|
+            plus_one = @names.index(house) + 1
+            minus_one = @names.index(house) - 1
+            if house.color[@val_one] == 1
+                @names[plus_one].color[@val_two] = 1
+            elsif house.color[@val_two] == 1
+                @names[minus_one].color[@val_one] = 1
             end
         end
     end
@@ -110,4 +137,15 @@ end
 @three.drink["milk"] = 1
 @one.nationality["norwegian"] = 1
 
-@test2 = pair_check
+10.times do |cycle|
+    pair_check
+    janitor
+    one_neighbor
+    janitor
+    both_neighbor
+    janitor
+    @names.each do |look|
+        print look
+        puts " "
+    end
+end
