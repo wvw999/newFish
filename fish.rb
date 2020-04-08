@@ -117,8 +117,6 @@ def pair_check
     end
 end
 
-# if a value is 1, or 4 are 0, complete setting others values for that attribute
-# additionally, if any house attribute value is 1, set it to 0 for all the other houses
 def janitor
     @names.each do |house|
         @attribs.each do |attrib|
@@ -146,8 +144,6 @@ def janitor
     end
 end
 
-# first two clues are direct assignments and need no logic to locate them, just setting them directly
-# binding.pry
 @three.drink["milk"] = 1
 @one.nationality["norwegian"] = 1
 
